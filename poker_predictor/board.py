@@ -1,4 +1,4 @@
-from Deck import *
+from .deck import Deck
 
 class Board:
     def __init__(self) -> None:
