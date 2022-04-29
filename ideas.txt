@@ -1,0 +1,2 @@
+- the hand function would need to return all hands a player currently has. If two players have the same top hand like 'flush', them you would need to go to the next one. 
+    So it would be easier to return a boolean array of all possible hands in order from best to worst. Then iterate through the array and compare 
