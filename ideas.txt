@@ -2,3 +2,6 @@
     So it would be easier to return a boolean array of all possible hands in order from best to worst. Then iterate through the array and compare 
 - automate the process to simulate thousands of hands and do a little data science visualization project of the chances for each hand coming up, 
     if the model runs into any crazy edge cases, percentage of one player winning
+- don't need to determine the absolute winner until the board is complete. So while two players might have the same exact full house,
+    if the river card still needs to be shown, then it's ok to just leave them at a tie
+- crazy edge case: two players have a straight flush / four of a kind. How many hands would need to be played to get to this scenario?
