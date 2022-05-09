@@ -1,4 +1,8 @@
 # always want to rank ace as the highest, only consider it being lowest in ex. determine straight method
+from numpy import true_divide
+from scipy.misc import electrocardiogram
+
+
 value_rankings = {
     '2': 1,
     '3': 2,
@@ -66,29 +70,9 @@ class Player:
 
         return frequency
 
-    def handRank(self):
-        return hand_rankings[self.hand]
-
-    # TODO(Should it be the highest hand or all possible hands?) Probably just the highest
-    # def hands(self):
-    #     """ Returns a boolean array of all possible hands the player currently has """
-
-    #     number1 = self.card1[0]
-    #     number2 = self.card2[0]
-    #     suit1 = self.card1[1]
-    #     suit2 = self.card2[1]
-
-    #     # if number1 == number2:
-    #     #     return "pair"
-    #     # elif suit1 == suit2:
-    #     #     return "suited"
-    #     # else:
-    #     #     return
-
     def setHighCard(self):
         """ Assigns the high_card array in order from best to worst """
         pass
-
     
     def setHighCardHand(self):
         self.hand = 'high_card'
@@ -111,6 +95,7 @@ class Player:
         Determines if the player has a two pair
         Boolean return, does not determine the value of highest two pair 
         """
+        #TODO NOT WORKING IN SOME CASES WHERE 2 PAIR IS ON THE BOARD
         valid = False
         frequency = self.numberFrequency(_board)
         total = 0
@@ -222,21 +207,92 @@ class Player:
         if valid: self.hand = 'straight_flush'
         return valid
 
-    def hasHandRoyalFlush(self, _board):
-        valid = False
-        valueFrequency = self.numberFrequency(_board)
-        suitFrequency = self.suitFrequency(_board)
-        # ace, king, queen, jack, 10
-        if valueFrequency[0] >= 1 and valueFrequency[12] >= 1 and valueFrequency[11] >= 1 and valueFrequency[10] >= 1 and valueFrequency[9] >= 1:
-            #TODO NOT WORKING there can be a scenario where you have a royal straight, but the flush includes the 1 or 2 other cards
-            for value in suitFrequency:
-                if value >= 5:
-                    valid = True
-                    # print("Royal Flush!")
-                    # print(f"{self.card1}{self.card2}")
+    def royalCardValueCheck(self, card):
+        if card.value == 'A' or card.value == 'K' or card.value == 'Q' or card.value == 'J' or card.value == "10":
+            return True
+        else: return False
+
+    # def hasHandRoyalFlush(self, board):
+    #     """
+    #     Check if the player has a royal flush
+    #     """
+    #     valid = False
+    #     count = 0
+    #     suit = None
+    #     # check the board
+    #     for card in board:
+    #         if suit:
+    #             if self.royalCardValueCheck(card):
+    #                 if card.suit == suit: count += 1
+    #                 else: 
+    #                     # reset
+    #                     suit = card.suit
+    #                     count = 1
+    #             else: 
+    #                 # reset. Only way to get here is if you started building RF, but got a non-royal card
+    #                 # need to get the suit 
+    #                 # suit = card.suit
+    #                 count = 0
+    #         else:
+    #             if self.royalCardValueCheck(card): 
+    #                 count += 1
+    #                 suit = card.suit
+    #     if self.royalCardValueCheck(self.card1) and self.card1.suit == suit: count += 1
+    #     if self.royalCardValueCheck(self.card2) and self.card2.suit == suit: count += 1
+
+        
+    #     # if the count is 5, valid
+    #     if count >= 5: valid = True
+
+    #     if valid: self.hand = 'royal_flush'
+    #     return valid
+
+    def hasHandRoyalFlush(self, board):
+        """
+        Check if the player has a royal flush
+        """
+        suit_dict = {'c': 0, 's': 1, 'd': 2, 'h': 3}
+        inv_suit_dict = {0: 'c', 1:'s', 2:'d', 3:'h'}
+        valid = False 
+        count = 0
+        suit = None
+        rankedBoard = []
+        frequency = [0, 0, 0, 0]
+        # add on the cards from the board
+        for card in board:
+            frequency[suit_dict[card.suit]] += 1
+        # check the board. Needs to be at least 3 RF cards on the board
+        for i, ele in enumerate(frequency):
+            if ele >= 3:
+                suit = inv_suit_dict[i]
+                # sort the board array
+                rankedBoard = self.bubbleSort(board)
+        for card in reversed(rankedBoard):
+            # now have a sorted array. The only way the first card is not a royal card is if there are no royal cards at all 
+            if self.royalCardValueCheck(card) and card.suit == suit: count += 1
+        if self.royalCardValueCheck(self.card1) and self.card1.suit == suit: count += 1
+        if self.royalCardValueCheck(self.card2) and self.card2.suit == suit: count += 1
+
+        # if the count is 5, valid
+        if count >= 5: valid = True
 
         if valid: self.hand = 'royal_flush'
         return valid
+
+    def bubbleSort(self, arr):
+        suit_dict = {'c': 0, 's': 1, 'd': 2, 'h': 3}
+        value_dict = {'A': 13, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, '10': 9, 'J': 10, 'Q': 11, 'K': 12}
+        # [lowest ... highest]
+        n = len(arr)
+
+        for i in range(n):
+            for j in range(0, n-i-1):
+                if value_dict[arr[j].value] > value_dict[arr[j+1].value]:
+                # and suit_dict[arr[j].suit] > suit_dict[arr[j+1].suit]:
+                    # swap
+                    arr[j], arr[j+1] = arr[j+1], arr[j]
+
+        return arr
 
     def evaluateFullHouse(self, board):
         """ Determines the chances of the player getting a full house on the next sequence """

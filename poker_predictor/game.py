@@ -104,33 +104,41 @@ class Game:
         self.shuffle()
         self.dealFirst()
         # first round of evaluation
-        self.evaluatePlayers()
-        # self.printInfo()
+        # self.evaluatePlayers()
+        # self.printInfo(1)
         # time.sleep(delay)
         # second round of evaluation
         self.dealFlop()
-        self.evaluatePlayers()
-        # self.printInfo()
+        # self.evaluatePlayers()
+        # self.printInfo(2)
         # time.sleep(delay)
         # third round of evaluation
         self.dealSingleCard()
-        self.evaluatePlayers()
-        # self.printInfo()
+        # self.evaluatePlayers()
+        # self.printInfo(3)
         # time.sleep(delay)
         # final round of evaluation
         self.dealSingleCard()
         self.evaluatePlayers()
-        # self.printInfo()
+        # self.printInfo(4)
         # time.sleep(delay)
         # self.printFinalResults()
 
-    def printInfo(self):
-        print("\n-------------------------------------------------------\n     ")
-        for i in range(len(self.board)):
-            print(f"{self.board[i].value}{self.board[i].suit}", end='  ')
-        print("\n")
+    def printInfo(self, roundNumber):
+        print("\n-----------------------")
+        if roundNumber == 1:
+            print(  "|                     |")
+        if roundNumber == 2:
+            print(f"| {self.board[0].value}{self.board[0].suit}  {self.board[1].value}{self.board[1].suit}  {self.board[2].value}{self.board[2].suit}          |")
+        if roundNumber == 3:
+            print(f"| {self.board[0].value}{self.board[0].suit}  {self.board[1].value}{self.board[1].suit}  {self.board[2].value}{self.board[2].suit }  {self.board[3].value}{self.board[3].suit}      |")
+        if roundNumber == 4:
+            print(f"| {self.board[0].value}{self.board[0].suit}  {self.board[1].value}{self.board[1].suit}  {self.board[2].value}{self.board[2].suit }  {self.board[3].value}{self.board[3].suit}  {self.board[4].value}{self.board[4].suit} |")
+        # for i in range(len(self.board)):
+        #     print(f"| {self.board[i].value}{self.board[i].suit}", end='  ')
+        print("-----------------------\n")
         for i,ele in enumerate(self.players):
-            print(f"Player {i+1}:   {ele.hand}   {ele.card1.value}{ele.card1.suit} {ele.card2.value}{ele.card2.suit}")
+            print(f"Player {i+1}:   {ele.hand:<15}   {ele.card1.value}{ele.card1.suit} {ele.card2.value}{ele.card2.suit}")
 
     def shuffle(self):
         """ Shuffles the deck randomly """
@@ -160,11 +168,16 @@ class Game:
     def evaluatePlayers(self):
         """ 
         Evaluate each player for their highest hand 
-        player method updates hand member variable, returns bool
+        Player method updates hand member variable, returns bool
         Saves computation by not calculating any hands that are lowest than the highest
         """
         for player in self.players:
-            if player.hasHandRoyalFlush(self.board): continue
+            if player.hasHandRoyalFlush(self.board):
+                if len(self.board) == 5:
+                    print('Royal flush')   
+                # print('Royal flush!!\n')
+                # print(f"{player.card1.value}{player.card1.suit} {player.card2.value}{player.card2.suit}\n {self.board}\n")
+                continue
             elif player.hasHandStraightFlush(self.board): continue
             elif player.hasHandFourOfAKind(self.board): continue
             elif player.hasHandFullHouse(self.board): continue
@@ -212,6 +225,9 @@ class Game:
         """
         Compares players with a pair. Returns winner player object
 
+        RULES:
+        1) Highest pair
+        2) 1 kicker card
         """
         # first compare the value of the hand
 
@@ -224,7 +240,8 @@ class Game:
 
         RULES:
         1) Highest three of a kind wins, doesn't matter the suit
-        2) If exact same, move on to 2 kicker cards
+        2) First kicker card
+        3) Second kicker card
         """
         # first compare the value of the hand
 

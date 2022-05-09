@@ -5,3 +5,77 @@
 - don't need to determine the absolute winner until the board is complete. So while two players might have the same exact full house,
     if the river card still needs to be shown, then it's ok to just leave them at a tie
 - crazy edge case: two players have a straight flush / four of a kind. How many hands would need to be played to get to this scenario?
+
+
+
+
+
+
+
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
+Royal flush
