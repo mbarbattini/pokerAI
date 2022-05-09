@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from threading import local
 import numpy as np
 import random
 from player import Player
@@ -104,24 +105,24 @@ class Game:
         self.shuffle()
         self.dealFirst()
         # first round of evaluation
-        # self.evaluatePlayers()
-        # self.printInfo(1)
-        # time.sleep(delay)
+        self.evaluatePlayers()
+        self.printInfo(1)
+        time.sleep(delay)
         # second round of evaluation
         self.dealFlop()
-        # self.evaluatePlayers()
-        # self.printInfo(2)
-        # time.sleep(delay)
+        self.evaluatePlayers()
+        self.printInfo(2)
+        time.sleep(delay)
         # third round of evaluation
         self.dealSingleCard()
-        # self.evaluatePlayers()
-        # self.printInfo(3)
-        # time.sleep(delay)
+        self.evaluatePlayers()
+        self.printInfo(3)
+        time.sleep(delay)
         # final round of evaluation
         self.dealSingleCard()
         self.evaluatePlayers()
-        # self.printInfo(4)
-        # time.sleep(delay)
+        self.printInfo(4)
+        time.sleep(delay)
         # self.printFinalResults()
 
     def printInfo(self, roundNumber):

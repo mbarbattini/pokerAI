@@ -5,9 +5,12 @@ import time
 
 def main():
 
-    numberPlayers = 1
+    # numberPlayers = 2
+    # numberGames = 1000000
+
+    numberPlayers = 8
     delay = 3
-    numberGames = 2000000
+    numberGames = 1
 
     start = time.time()
     for i in range(numberGames):
