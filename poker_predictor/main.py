@@ -5,18 +5,17 @@ import time
 
 def main():
 
-    # numberPlayers = 2
-    # numberGames = 1000000
+    numberPlayers = 1
+    numberGames = 2000000
 
-    numberPlayers = 8
-    delay = 3
-    numberGames = 1
+    # numberPlayers = 1
+    # numberGames = 1
 
     start = time.time()
     for i in range(numberGames):
 
         game = Game(numberPlayers)
-        game.play(delay)
+        game.play(i)
     
     print(f"\nComputation time: {(time.time()-start) /60} min\n")
 

@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from threading import local
 import numpy as np
 import random
-from player import Player
+# from player import Player
+# from non_numpy_player import Player
+from hybrid_player import Player
 import time
 
 @dataclass
@@ -100,30 +102,41 @@ class Game:
         self.board = []
         self.nPlayers = nPlayers
 
-    def play(self, delay):
+    def play(self, gameNumber, delay=False):
         """ Sequence of events for a complete game """
         self.shuffle()
         self.dealFirst()
+
         # first round of evaluation
-        self.evaluatePlayers()
-        self.printInfo(1)
-        time.sleep(delay)
+        # self.evaluatePlayers()
+        # self.printInfo(1)
+        if delay:
+            time.sleep(3)
+
         # second round of evaluation
         self.dealFlop()
-        self.evaluatePlayers()
-        self.printInfo(2)
-        time.sleep(delay)
+        # self.evaluatePlayers()
+        # self.printInfo(2)
+        if delay:
+            time.sleep(3)
+
         # third round of evaluation
         self.dealSingleCard()
-        self.evaluatePlayers()
-        self.printInfo(3)
-        time.sleep(delay)
+        # self.evaluatePlayers()
+        # self.printInfo(3)
+        if delay:
+            time.sleep(3)
+
         # final round of evaluation
         self.dealSingleCard()
+        # self.performance()
         self.evaluatePlayers()
-        self.printInfo(4)
-        time.sleep(delay)
+        # self.printInfo(4)
+        if delay:
+            time.sleep(3)
         # self.printFinalResults()
+        if gameNumber % 10000 == 0:
+            print(f"Game {gameNumber//1000}k")
 
     def printInfo(self, roundNumber):
         print("\n-----------------------")
@@ -166,6 +179,29 @@ class Game:
         for i in range(3):
             self.board.append(self.chooseCard())
 
+    def performance(self):
+        for player in self.players:
+            print(f"Build Player Hand Array:")
+            # player.buildPlayerHandArray(self.board)
+            print('Has Hand Royal Flush:')
+            player.hasHandRoyalFlush(self.board)
+            print('Has Hand Straight Flush')
+            player.hasHandStraightFlush(self.board)
+            print('Has Hand Four of a Kind')
+            player.hasHandFourOfAKind(self.board)
+            print('Has Hand Full House')
+            player.hasHandFullHouse(self.board)
+            print('Has Hand Flush')
+            player.hasHandFlush(self.board)
+            print('Has Hand Straight')
+            player.hasHandStraight(self.board)
+            print('Has Hand Three of a Kind')
+            player.hasHandThreeOfAKind(self.board)
+            print('Has Hand Two Pair')
+            player.hasHandTwoPair(self.board)
+            print('Has Hand Pair')
+            player.hasHandPair(self.board)
+
     def evaluatePlayers(self):
         """ 
         Evaluate each player for their highest hand 
@@ -173,9 +209,11 @@ class Game:
         Saves computation by not calculating any hands that are lowest than the highest
         """
         for player in self.players:
+            # build the player's card array
+            # player.buildPlayerHandArray(self.board)
             if player.hasHandRoyalFlush(self.board):
-                if len(self.board) == 5:
-                    print('Royal flush')   
+                # if len(self.board) == 5:
+                    # print('Royal flush')   
                 # print('Royal flush!!\n')
                 # print(f"{player.card1.value}{player.card1.suit} {player.card2.value}{player.card2.suit}\n {self.board}\n")
                 continue
@@ -188,7 +226,7 @@ class Game:
             elif player.hasHandTwoPair(self.board): continue
             elif player.hasHandPair(self.board): continue
             # probably not needed because each player is initalized with high_card
-            else: player.setHighCardHand()
+            # else: player.setHighCardHand()
 
     
 
