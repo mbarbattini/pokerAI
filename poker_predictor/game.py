@@ -2,9 +2,8 @@ from dataclasses import dataclass
 from threading import local
 import numpy as np
 import random
-# from player import Player
+from player import Player
 # from non_numpy_player import Player
-from hybrid_player import Player
 import time
 
 @dataclass
@@ -42,7 +41,7 @@ value_rankings = {
     'A': 13
 }
 
-class Game:
+class Game():
     def __init__(self, nPlayers: int) -> None:
         self.players = [Player() for i in range(nPlayers)]
         self.deck = [ 
@@ -101,8 +100,18 @@ class Game:
         ]
         self.board = []
         self.nPlayers = nPlayers
+        self.countHighCard = 0
+        self.countPair = 0
+        self.countTwoPair = 0
+        self.countThreeOfAKind = 0
+        self.countStraight = 0
+        self.countFlush = 0
+        self.countFullHouse = 0
+        self.countFourOfAKind = 0
+        self.countStraightFlush = 0
+        self.countRoyalFlush = 0
 
-    def play(self, gameNumber, delay=False):
+    def play(self, delay=False):
         """ Sequence of events for a complete game """
         self.shuffle()
         self.dealFirst()
@@ -131,12 +140,13 @@ class Game:
         self.dealSingleCard()
         # self.performance()
         self.evaluatePlayers()
+        
         # self.printInfo(4)
         if delay:
             time.sleep(3)
         # self.printFinalResults()
-        if gameNumber % 10000 == 0:
-            print(f"Game {gameNumber//1000}k")
+        # if gameNumber % 10000 == 0:
+            # print(f"Game {gameNumber//1000}k")
 
     def printInfo(self, roundNumber):
         print("\n-----------------------")
@@ -182,7 +192,6 @@ class Game:
     def performance(self):
         for player in self.players:
             print(f"Build Player Hand Array:")
-            # player.buildPlayerHandArray(self.board)
             print('Has Hand Royal Flush:')
             player.hasHandRoyalFlush(self.board)
             print('Has Hand Straight Flush')
@@ -202,6 +211,22 @@ class Game:
             print('Has Hand Pair')
             player.hasHandPair(self.board)
 
+    def finalPlayerHands(self):
+        """ Returns an array of the hand distribution for the game """
+        return np.array([
+            self.countHighCard,
+            self.countPair,
+            self.countTwoPair,
+            self.countThreeOfAKind,
+            self.countStraight,
+            self.countFlush,
+            self.countFullHouse,
+            self.countFourOfAKind,
+            self.countStraightFlush,
+            self.countRoyalFlush,
+        ],dtype=int)
+
+
     def evaluatePlayers(self):
         """ 
         Evaluate each player for their highest hand 
@@ -209,24 +234,35 @@ class Game:
         Saves computation by not calculating any hands that are lowest than the highest
         """
         for player in self.players:
-            # build the player's card array
-            # player.buildPlayerHandArray(self.board)
             if player.hasHandRoyalFlush(self.board):
-                # if len(self.board) == 5:
-                    # print('Royal flush')   
-                # print('Royal flush!!\n')
-                # print(f"{player.card1.value}{player.card1.suit} {player.card2.value}{player.card2.suit}\n {self.board}\n")
+                self.countRoyalFlush += 1
                 continue
-            elif player.hasHandStraightFlush(self.board): continue
-            elif player.hasHandFourOfAKind(self.board): continue
-            elif player.hasHandFullHouse(self.board): continue
-            elif player.hasHandFlush(self.board): continue
-            elif player.hasHandStraight(self.board): continue
-            elif player.hasHandThreeOfAKind(self.board): continue
-            elif player.hasHandTwoPair(self.board): continue
-            elif player.hasHandPair(self.board): continue
-            # probably not needed because each player is initalized with high_card
-            # else: player.setHighCardHand()
+            elif player.hasHandStraightFlush(self.board): 
+                self.countStraightFlush += 1
+                continue
+            elif player.hasHandFourOfAKind(self.board): 
+                self.countFourOfAKind += 1
+                continue
+            elif player.hasHandFullHouse(self.board): 
+                self.countFullHouse += 1
+                continue
+            elif player.hasHandFlush(self.board): 
+                self.countFlush += 1
+                continue
+            elif player.hasHandStraight(self.board): 
+                self.countStraight += 1
+                continue
+            elif player.hasHandThreeOfAKind(self.board): 
+                self.countThreeOfAKind += 1
+                continue
+            elif player.hasHandTwoPair(self.board): 
+                self.countTwoPair += 1
+                continue
+            elif player.hasHandPair(self.board): 
+                self.countPair += 1
+                continue
+            else:
+                self.countHighCard += 1
 
     
 
@@ -389,8 +425,9 @@ class Game:
         elif rankIndex == 1:
             return self.compareStraightFlush(currentPlayers)
         elif rankIndex == 0:
+            # not possible for two players to have a better royal flush over another
+            # only way to get here is if the royal flush is on the table
             pass
-            # not possible for two players to have a royal flush
     
 
     def printFinalResults(self):
