@@ -29,17 +29,23 @@ value_rankings = {
     'A': 13
 }
 
+VALUE_DICT_ACE_HIGH = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12}
+VALUE_DICT_ACE_LOW = {'A': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, '10': 9, 'J': 10, 'Q': 11, 'K': 12}
+SUIT_DICT = {'c': 0, 's': 1, 'd': 2, 'h': 3}
+INV_SUIT_DICT = {0: 'c', 1:'s', 2:'d', 3:'h'}
+
 class Player:
     
     def __init__(self):
         self.card1 = None
         self.card2 = None
-        self.hand = "high_card"
+        self.hand = 'high_card'
         self.probability = None
         # an array with 7 elements, worst case is two players have exact same high card up until the last one
         # Player 1: [10,9,8,7,6,5,4]
         # Player 2: [10,9,8,7,6,5,2]
         self.high_card = []
+        self.bestCards = []]
 
     def numberFrequency(self, board, aceHigh=False):
         """ Returns an array of all cards and the number of each currently held by the player """
@@ -49,9 +55,9 @@ class Player:
         number1 = self.card1.value
         number2 = self.card2.value
         if aceHigh:
-            value_dict = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12}
+            value_dict = VALUE_DICT_ACE_HIGH
         else:
-            value_dict = {'A': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, '10': 9, 'J': 10, 'Q': 11, 'K': 12}
+            value_dict = VALUE_DICT_ACE_LOW
 
         frequency[value_dict[number1]] += 1
         frequency[value_dict[number2]] += 1
@@ -67,30 +73,27 @@ class Player:
         # [club, spades, diamond, heart]
         frequency = [0, 0, 0, 0]
 
-        suit_dict = {'c': 0, 's': 1, 'd': 2, 'h': 3}
-
         # cards currently held by the player
         suit1 = self.card1.suit
         suit2 = self.card2.suit
 
-        frequency[suit_dict[suit1]] += 1
-        frequency[suit_dict[suit2]] += 1
+        frequency[SUIT_DICT[suit1]] += 1
+        frequency[SUIT_DICT[suit2]] += 1
 
         # add on the cards from the board
         for card in board:
-            frequency[suit_dict[card.suit]] += 1
+            frequency[SUIT_DICT[card.suit]] += 1
 
         return frequency
 
 
-    def hasHandPair(self, _board):
+    def hasHandPair(self, board):
         """ Determines if the player has a pair """
         valid = False
-        # find the frequency of all cards held
-        frequency = self.numberFrequency(_board)
+        frequency = self.numberFrequency(board)
         # pair is defined if any frequency is exactly equal to 2. Doesn't matter if its greater
-        # or if two different values have a frequency of 2
-        for value in frequency:
+        # or if two/three different values have a frequency of 2
+        for i,value in enumerate(frequency):
             if value == 2:
                 valid = True
         if valid: self.hand = 'pair'
@@ -233,20 +236,18 @@ class Player:
         """
         valid = False 
 
-        suit_dict = {'c': 0, 's': 1, 'd': 2, 'h': 3}
-        inv_suit_dict = {0: 'c', 1:'s', 2:'d', 3:'h'}
-        value_dict = {'A': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, '10': 9, 'J': 10, 'Q': 11, 'K': 12}
+        value_dict = VALUE_DICT_ACE_LOW
 
         # if there is a suit greater than 5
         mostCommonSuit = None
         frequencySuit = [0, 0, 0, 0]
         for card in board:
-            frequencySuit[suit_dict[card.suit]] += 1
-        frequencySuit[suit_dict[self.card1.suit]] += 1
-        frequencySuit[suit_dict[self.card2.suit]] += 1
+            frequencySuit[SUIT_DICT[card.suit]] += 1
+        frequencySuit[SUIT_DICT[self.card1.suit]] += 1
+        frequencySuit[SUIT_DICT[self.card2.suit]] += 1
         for i, ele in enumerate(frequencySuit):
             if ele >= 5:
-                mostCommonSuit = inv_suit_dict[i]
+                mostCommonSuit = INV_SUIT_DICT[i]
 
         # create a ranked array of only cards of the most common suit
         frequencyValue = [0] * 13
@@ -284,19 +285,17 @@ class Player:
         2) Check if the most common suit cards are royal cards
         3) Check if players cards are royal and the same suit
         """
-        suit_dict = {'c': 0, 's': 1, 'd': 2, 'h': 3}
-        inv_suit_dict = {0: 'c', 1:'s', 2:'d', 3:'h'}
         valid = False 
         count = 0
         mostCommonSuit = None
         frequency = [0, 0, 0, 0]
         # add on the cards from the board
         for card in board:
-            frequency[suit_dict[card.suit]] += 1
+            frequency[SUIT_DICT[card.suit]] += 1
         # check the board. Needs to be at least 3 RF cards on the board
         for i, ele in enumerate(frequency):
             if ele >= 3:
-                mostCommonSuit = inv_suit_dict[i]
+                mostCommonSuit = INV_SUIT_DICT[i]
                 # sort the board array
         for card in reversed(board):
             if self.royalCardValueCheck(card) and card.suit == mostCommonSuit: count += 1
@@ -308,6 +307,49 @@ class Player:
 
         if valid: self.hand = 'royal_flush'
         return valid
+
+
+    # def bestHandHighCard(self, board):
+    #     """ Finds the player's 5 cards that make up their best high card hand """
+    #     self.bestCards = []
+
+    # def bestHandPair(self, board):
+    #     """ Finds the player's 5 cards that make up their best pair """
+
+    #     self.bestCards = []
+
+    # def bestHandTwoPair(self, board):
+    #     """ Finds the player's 5 cards that make up their best two pair """
+    #     self.bestCards = []
+
+    # def bestHandThreeOfAKind(self, board):
+    #     """ Finds the player's 5 cards that make up their best three of a kind """
+    #     self.bestCards = []
+
+    # def bestHandStraight(self, board):
+    #     """ Finds the player's 5 cards that make up their best straight """
+    #     self.bestCards = []
+
+    # def bestHandFlush(self, board):
+    #     """ Finds the player's 5 cards that make up their best flush """
+    #     self.bestCards = []
+
+    # def bestHandFullHouse(self, board):
+    #     """ Finds the player's 5 cards that make up their best full house """
+    #     self.bestCards = []
+
+    # def bestHandFourOfAKind(self, board):
+    #     """ Finds the player's 5 cards that make up their best four of a kind """
+    #     self.bestCards = []
+
+    # def bestHandStraightFlush(self, board):
+    #     """ Finds the player's 5 cards that make up their best straight flush """
+    #     self.bestCards = []
+
+    # def bestHandRoyalFlush(self, baord):
+    #     """ Finds the player's 5 cards that make up their best royal flush """
+    #     self.bestCards = []
+
 
 
     def evaluateFullHouse(self, board):

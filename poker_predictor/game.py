@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from threading import local
+from unittest.mock import NonCallableMagicMock
 import numpy as np
 import random
 from player import Player
@@ -117,31 +118,32 @@ class Game():
         self.dealFirst()
 
         # first round of evaluation
-        # self.evaluatePlayers()
-        # self.printInfo(1)
+        self.evaluatePlayers()
+        self.printInfo(1)
         if delay:
             time.sleep(3)
 
         # second round of evaluation
         self.dealFlop()
-        # self.evaluatePlayers()
-        # self.printInfo(2)
+        self.evaluatePlayers()
+        self.printInfo(2)
         if delay:
             time.sleep(3)
 
         # third round of evaluation
         self.dealSingleCard()
-        # self.evaluatePlayers()
-        # self.printInfo(3)
+        self.evaluatePlayers()
+        self.printInfo(3)
         if delay:
             time.sleep(3)
 
         # final round of evaluation
         self.dealSingleCard()
-        # self.performance()
+        self.performance()
         self.evaluatePlayers()
-        
-        # self.printInfo(4)
+        self.printInfo(4)
+        winner = self.determineWinner()
+        print(f'Winner: {winner.hand} ({winner.bestCards})')
         if delay:
             time.sleep(3)
         # self.printFinalResults()
@@ -236,33 +238,43 @@ class Game():
         for player in self.players:
             if player.hasHandRoyalFlush(self.board):
                 self.countRoyalFlush += 1
+                player.bestHandRoyalFlush(self.board)
                 continue
             elif player.hasHandStraightFlush(self.board): 
                 self.countStraightFlush += 1
+                player.bestHandStraightFlush(self.board)
                 continue
             elif player.hasHandFourOfAKind(self.board): 
                 self.countFourOfAKind += 1
+                player.bestHandFourOfAKind(self.board)
                 continue
             elif player.hasHandFullHouse(self.board): 
                 self.countFullHouse += 1
+                player.bestHandFullHouse(self.board)
                 continue
             elif player.hasHandFlush(self.board): 
                 self.countFlush += 1
+                player.bestHandFlush(self.board)
                 continue
             elif player.hasHandStraight(self.board): 
                 self.countStraight += 1
+                player.bestHandStraight(self.board)
                 continue
             elif player.hasHandThreeOfAKind(self.board): 
                 self.countThreeOfAKind += 1
+                player.bestHandThreeOfAKind(self.board)
                 continue
             elif player.hasHandTwoPair(self.board): 
                 self.countTwoPair += 1
+                player.bestHandTwoPair(self.board)
                 continue
             elif player.hasHandPair(self.board): 
                 self.countPair += 1
+                player.bestHandPair(self.board)
                 continue
             else:
                 self.countHighCard += 1
+                player.bestHandHighCard(self.board)
 
     
 
@@ -374,32 +386,34 @@ class Game():
 
         # if the value is the same, move on to high card check
 
-    #NOTE impossible to get two royal flushes in Texas Hold Em'
+    #NOTE impossible to get two different royal flushes in Texas Hold Em'
 
-    def determineRoundWinner(self):
+    def determineWinner(self):
         """
         Compares each player's hands against each other. Returns array of player objects with highest player in first index
         """
         # create a 2D array of ranked player objects. Highest first index is winner
         # Second index is if there any any players with the same hand
-        rankedHands = np.empty((self.nPlayers, self.nPlayers))
+        rankedHands = [ [],[],[],[],[],[],[],[],[],[] ]
+
         for player in self.players:
             index = hand_rankings[player.hand]
             # append to the array of the hand type for any additional players
-            rankedHands[index] = np.append(rankedHands[index], player)
+            rankedHands[index].append(player)
 
         # iterate from best hand to worst. i: 0 -> 9
         # 0 is the best hand because it was defined this way in hand_rankings dict
         for i in range(10):
             currentPlayers = rankedHands[i]
             # if no current players have the specified hand, move on to the next
-            if currentPlayers:
-                totalPlayers = len(currentPlayers)
-                # if there is only one player, they automatically win
-                if totalPlayers == 1:
-                    return currentPlayers[0]
+            if not currentPlayers:
+                continue
+            totalPlayers = len(currentPlayers)
+            if not totalPlayers == 1:
                 # else compare all players who have the same hand
                 return self.compareHands(i, currentPlayers)
+            # if there is only one player, they automatically win
+            return currentPlayers[0]
 
 
     def compareHands(self, rankIndex, currentPlayers):

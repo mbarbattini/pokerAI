@@ -4,7 +4,7 @@ from game import Game
 import time
 import numpy as np
 
-def main():
+def handFrequencySimulations():
 
     numberPlayers = 1
     numberGames = 2000000
@@ -21,6 +21,20 @@ def main():
 
     for ele in reversed(handFrequency):
         print(ele)
+
+
+def playSingleGames():
+    numberPlayers = 16
+    numberGames = 1
+    delay = 1
+
+    for i in range(numberGames):
+        game = Game(numberPlayers)
+        game.play(delay)
+
+
+def main():
+    playSingleGames()
 
 
 
