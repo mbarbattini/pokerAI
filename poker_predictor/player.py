@@ -309,46 +309,7 @@ class Player:
         return valid
 
 
-    # def bestHandHighCard(self, board):
-    #     """ Finds the player's 5 cards that make up their best high card hand """
-    #     self.bestCards = []
 
-    # def bestHandPair(self, board):
-    #     """ Finds the player's 5 cards that make up their best pair """
-
-    #     self.bestCards = []
-
-    # def bestHandTwoPair(self, board):
-    #     """ Finds the player's 5 cards that make up their best two pair """
-    #     self.bestCards = []
-
-    # def bestHandThreeOfAKind(self, board):
-    #     """ Finds the player's 5 cards that make up their best three of a kind """
-    #     self.bestCards = []
-
-    # def bestHandStraight(self, board):
-    #     """ Finds the player's 5 cards that make up their best straight """
-    #     self.bestCards = []
-
-    # def bestHandFlush(self, board):
-    #     """ Finds the player's 5 cards that make up their best flush """
-    #     self.bestCards = []
-
-    # def bestHandFullHouse(self, board):
-    #     """ Finds the player's 5 cards that make up their best full house """
-    #     self.bestCards = []
-
-    # def bestHandFourOfAKind(self, board):
-    #     """ Finds the player's 5 cards that make up their best four of a kind """
-    #     self.bestCards = []
-
-    # def bestHandStraightFlush(self, board):
-    #     """ Finds the player's 5 cards that make up their best straight flush """
-    #     self.bestCards = []
-
-    # def bestHandRoyalFlush(self, baord):
-    #     """ Finds the player's 5 cards that make up their best royal flush """
-    #     self.bestCards = []
 
 
 

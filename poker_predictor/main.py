@@ -1,5 +1,5 @@
 # from poker_predictor import Player, Game
-from player import Player
+from playerImproved import Player
 from game import Game
 import time
 import numpy as np
@@ -24,7 +24,7 @@ def handFrequencySimulations():
 
 
 def playSingleGames():
-    numberPlayers = 16
+    numberPlayers = 1
     numberGames = 1
     delay = 1
 

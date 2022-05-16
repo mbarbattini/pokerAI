@@ -3,8 +3,8 @@ from threading import local
 from unittest.mock import NonCallableMagicMock
 import numpy as np
 import random
-from player import Player
-# from non_numpy_player import Player
+# from player import Player
+from playerImproved import Player
 import time
 
 @dataclass
@@ -118,10 +118,10 @@ class Game():
         self.dealFirst()
 
         # first round of evaluation
-        self.evaluatePlayers()
-        self.printInfo(1)
-        if delay:
-            time.sleep(3)
+        # self.evaluatePlayers()
+        # self.printInfo(1)
+        # if delay:
+            # time.sleep(3)
 
         # second round of evaluation
         self.dealFlop()
@@ -236,45 +236,45 @@ class Game():
         Saves computation by not calculating any hands that are lowest than the highest
         """
         for player in self.players:
-            if player.hasHandRoyalFlush(self.board):
-                self.countRoyalFlush += 1
-                player.bestHandRoyalFlush(self.board)
-                continue
-            elif player.hasHandStraightFlush(self.board): 
-                self.countStraightFlush += 1
-                player.bestHandStraightFlush(self.board)
-                continue
-            elif player.hasHandFourOfAKind(self.board): 
-                self.countFourOfAKind += 1
-                player.bestHandFourOfAKind(self.board)
-                continue
-            elif player.hasHandFullHouse(self.board): 
-                self.countFullHouse += 1
-                player.bestHandFullHouse(self.board)
-                continue
-            elif player.hasHandFlush(self.board): 
-                self.countFlush += 1
-                player.bestHandFlush(self.board)
-                continue
-            elif player.hasHandStraight(self.board): 
-                self.countStraight += 1
-                player.bestHandStraight(self.board)
-                continue
-            elif player.hasHandThreeOfAKind(self.board): 
-                self.countThreeOfAKind += 1
-                player.bestHandThreeOfAKind(self.board)
-                continue
-            elif player.hasHandTwoPair(self.board): 
-                self.countTwoPair += 1
-                player.bestHandTwoPair(self.board)
-                continue
-            elif player.hasHandPair(self.board): 
-                self.countPair += 1
-                player.bestHandPair(self.board)
-                continue
-            else:
-                self.countHighCard += 1
-                player.bestHandHighCard(self.board)
+            # if player.hasHandRoyalFlush(self.board):
+            #     self.countRoyalFlush += 1
+            #     player.bestHandRoyalFlush(self.board)
+            #     continue
+            # elif player.hasHandStraightFlush(self.board): 
+            #     self.countStraightFlush += 1
+            #     player.bestHandStraightFlush(self.board)
+            #     continue
+            # elif player.hasHandFourOfAKind(self.board): 
+            #     self.countFourOfAKind += 1
+            #     player.bestHandFourOfAKind(self.board)
+            #     continue
+            # elif player.hasHandFullHouse(self.board): 
+            #     self.countFullHouse += 1
+            #     player.bestHandFullHouse(self.board)
+            #     continue
+            # elif player.hasHandFlush(self.board): 
+            #     self.countFlush += 1
+            #     player.bestHandFlush(self.board)
+            #     continue
+            # elif player.hasHandStraight(self.board): 
+            #     self.countStraight += 1
+            #     player.bestHandStraight(self.board)
+            #     continue
+            # elif player.hasHandThreeOfAKind(self.board): 
+            #     self.countThreeOfAKind += 1
+            #     player.bestHandThreeOfAKind(self.board)
+            #     continue
+            # elif player.hasHandTwoPair(self.board): 
+            #     self.countTwoPair += 1
+            #     player.bestHandTwoPair(self.board)
+            #     continue
+            player.hasHandPair(self.board)
+            self.countPair += 1
+            # player.bestHandPair(self.board)
+                # continue
+            # else:
+            #     self.countHighCard += 1
+            #     player.bestHandHighCard(self.board)
 
     
 
