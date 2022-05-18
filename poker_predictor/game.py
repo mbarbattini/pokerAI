@@ -44,7 +44,7 @@ value_rankings = {
 
 class Game():
     def __init__(self, nPlayers: int) -> None:
-        self.players = [Player() for i in range(nPlayers)]
+        self.players = [Player(i+1) for i in range(nPlayers)]
         self.deck = [ 
            Card('A','h'),
            Card('2','h'),
@@ -319,17 +319,17 @@ class Game():
                 # else compare all players who have the same hand
                 winner = self.comparePlayers(currentPlayers)
                 if len(winner) == 1:
-                   print(f"\nWinner:  {winner[0].hand}", end=' ')
+                   print(f"\nWinner:     Player {winner[0].number}", end=' ')
                    winner[0].printHand()
                    return
                 else:
                     print(f"\nTie Between Players:    {winner[0].hand}")
                     for i in range(len(winner)):
-                        print(f"    Player {i+1}:",end=' ') 
+                        print(f"    Player {winner[i].number}:",end=' ') 
                         winner[i].printHand()
                     return 
             # if there is only one player, they automatically win
-            print(f"\nWinner:     {currentPlayers[0].hand}")
+            print(f"\nWinner:     Player {currentPlayers[0].number}")
             currentPlayers[0].printHand()
             return
     

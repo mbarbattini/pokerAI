@@ -16,13 +16,14 @@ Tiebreaker member variable is an array with variable size. Depends on what hand 
 
 class Player:
     
-    def __init__(self):
+    def __init__(self, _number):
         self.card1 = None
         self.card2 = None
         self.hand = 'high_card'
         self.probability = None
         self.tiebreaker = None
         self.bestHand = []
+        self.number = _number
 
     def printHand(self):
         for card in self.bestHand:
@@ -169,7 +170,7 @@ class Player:
         # sort and get the best 5
         flushCards = sorted(flushCards, key=lambda card: VALUE_DICT_ACE_HIGH[card.value], reverse=True)
         self.hand = 'flush'
-        self.tiebreaker = [flushCards[0].value]
+        self.tiebreaker = [card.value for card in flushCards[:5]]
         self.bestHand = flushCards[:5]
         return True
 
