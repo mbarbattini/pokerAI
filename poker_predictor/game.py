@@ -319,17 +319,21 @@ class Game():
                 # else compare all players who have the same hand
                 winner = self.comparePlayers(currentPlayers)
                 if len(winner) == 1:
-                    #TODO print out player's winning cards
-                   print(f"Winner: {winner[0].hand}")
+                   print(f"\nWinner:  {winner[0].hand}", end=' ')
+                   winner[0].printHand()
                    return
                 else:
-                    print(f"Tie Between Players:")
+                    print(f"\nTie Between Players:    {winner[0].hand}")
                     for i in range(len(winner)):
-                        print(f"    Player {i+1}: {winner[i].hand}")
+                        print(f"    Player {i+1}:",end=' ') 
+                        winner[i].printHand()
                     return 
             # if there is only one player, they automatically win
-            print(f"Winner: {currentPlayers[0].hand}")
+            print(f"\nWinner:     {currentPlayers[0].hand}")
+            currentPlayers[0].printHand()
             return
+    
+    
     
 
     

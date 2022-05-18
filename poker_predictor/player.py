@@ -22,6 +22,11 @@ class Player:
         self.hand = 'high_card'
         self.probability = None
         self.tiebreaker = None
+        self.bestHand = []
+
+    def printHand(self):
+        for card in self.bestHand:
+            print(f"{card.value}{card.suit}",end=' ')
 
 
     def setHighCardTiebreaker(self, board):
@@ -55,6 +60,7 @@ class Player:
         # only three high cards for a pair
         highCards = highCards[:3]
         self.tiebreaker = pairs + highCards
+        self.bestHand = [card for card in cards if card.value == pairs[0] or card.value in highCards]
         return True
 
     def hasHandTwoPair(self, board):
@@ -80,6 +86,7 @@ class Player:
         kicker = highCards[0]
         self.hand = 'two_pair'
         self.tiebreaker = pairs + [kicker]
+        self.bestHand = [card for card in cards if card.value in pairs or card.value == kicker]
         return True
 
     def hasHandThreeOfAKind(self, board):
@@ -96,12 +103,13 @@ class Player:
         if len(threes) < 1:
             return False
         threes = sorted(threes, key=lambda f: (VALUE_DICT_ACE_HIGH[f]), reverse=True)
-        bestThree = [threes[0]]
+        bestThree = threes[0]
         uniqueValues.remove(threes[0])
         highCards = sorted(uniqueValues, key=lambda f: (VALUE_DICT_ACE_HIGH[f]), reverse=True)
         kickers = highCards[:2]
         self.hand = 'three_of_a_kind'
-        self.tiebreaker = bestThree + kickers
+        self.tiebreaker = [bestThree] + kickers
+        self.bestHand = [card for card in cards if card.value == bestThree or card.value in kickers]
         return True
 
     def hasHandStraight(self, board):
@@ -125,6 +133,7 @@ class Player:
             if substring in straightString:
                 self.hand = 'straight'
                 self.tiebreaker = [ordered[i]]
+                self.bestHand = [card for card in cards if card.value in ordered[i:i+5]]
                 return True
 
         # consider straights with ace high
@@ -135,6 +144,7 @@ class Player:
         if substring in straightString:
             self.hand = 'straight'
             self.tiebreaker = ['A']
+            self.bestHand = [card for card in cards if card.value in ordered[:5]]
             return True
         return False
 
@@ -154,12 +164,13 @@ class Player:
         if len(flushSuit) == 0:
             return False
         flushSuit = flushSuit[0]
-        # get all the values of the cards in the flush suit
-        flushCards = [value for value,suit in cards if suit == flushSuit]
+        # get all the cards in the flush suit
+        flushCards = [card for card in cards if card.suit == flushSuit]
         # sort and get the best 5
-        flushCards = sorted(flushCards, key=lambda f: VALUE_DICT_ACE_HIGH[f], reverse=True)
+        flushCards = sorted(flushCards, key=lambda card: VALUE_DICT_ACE_HIGH[card.value], reverse=True)
         self.hand = 'flush'
-        self.tiebreaker = [flushCards[0]]
+        self.tiebreaker = [flushCards[0].value]
+        self.bestHand = flushCards[:5]
         return True
 
     def hasHandFullHouse(self, board):
@@ -181,6 +192,7 @@ class Player:
                         tiebreaker = sorted([ele1, ele2], key=lambda f: VALUE_DICT_ACE_HIGH[f], reverse=True)
                         self.hand = 'full_house'
                         self.tiebreaker = tiebreaker
+                        self.bestHand = [card for card in cards if card.value in [ele1, ele2]]
                         return True
             if allValues.count(ele1) == 2:
                 for ele2 in uniqueValues:
@@ -188,6 +200,7 @@ class Player:
                         tiebreaker = sorted([ele1, ele2], key=lambda f: VALUE_DICT_ACE_HIGH[f], reverse=True)
                         self.hand = 'full_house'
                         self.tiebreaker = tiebreaker
+                        self.bestHand = [card for card in cards if card.value in [ele1, ele2]]
                         return True
         return False
 
@@ -203,8 +216,14 @@ class Player:
         fours = [v for v in uniqueValues if allValues.count(v) == 4]
         if not fours:
             return False
+        uniqueValues.remove(fours[0])
+        ordered = sorted(uniqueValues, key=lambda v: VALUE_DICT_ACE_HIGH[v], reverse=True)
+        kicker = ordered[0]
         self.hand = 'four_of_a_kind'
-        self.tiebreaker = fours
+        self.tiebreaker = fours + [kicker]
+        
+        #NOTE does not give 5 cards when kicker card has a frequency of greater than 2
+        self.bestHand = [card for card in cards if card.value == fours[0] or card.value == kicker]
         return True
         
 
@@ -226,10 +245,12 @@ class Player:
         ordered = sorted(cards, key=lambda card: (ranking[card.value], card.suit), reverse=True)
         ordered = [card for card in ordered if card.suit == mostCommonSuit[0]]
         for i in range(len(ordered) - 4):
-            substring = ' '.join(card.value for card in ordered[i:i+5])
+            values = [card.value for card in ordered[i:i+5]]
+            substring = ' '.join(values)
             if substring in straightString:
                 self.hand = 'straight_flush'
                 self.tiebreaker = [ordered[i].value]
+                self.bestHand = [card for card in cards if card.value in values and card.suit == mostCommonSuit[0]]
                 return True
 
     def hasHandRoyalFlush(self, board):
@@ -248,9 +269,11 @@ class Player:
         ordered = sorted(cards, key=lambda card: (VALUE_DICT_ACE_HIGH[card.value], card.suit), reverse=True)
         # remove duplicate cards of not the > 5 suit
         ordered = [card for card in ordered if card.suit == mostCommonSuit[0]]
-        substring = ' '.join(card.value for card in ordered[:5])
+        values = [card.value for card in ordered[:5]]
+        substring = ' '.join(values)
         if substring in royalFlushString:
             self.hand = 'royal_flush'
             self.tiebreaker = []
+            self.bestHand = [card for card in cards if card.value in values and card.suit == mostCommonSuit[0]]
             return True
         return False
