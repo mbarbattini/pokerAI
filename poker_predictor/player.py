@@ -1,7 +1,7 @@
 VALUE_DICT_ACE_HIGH = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12}
 VALUE_DICT_ACE_LOW = {'A': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8, '10': 9, 'J': 10, 'Q': 11, 'K': 12}
-SUIT_DICT = {'c': 0, 's': 1, 'd': 2, 'h': 3}
-INV_SUIT_DICT = {0: 'c', 1:'s', 2:'d', 3:'h'}
+# SUIT_DICT = {'c': 0, 's': 1, 'd': 2, 'h': 3}
+# INV_SUIT_DICT = {0: 'c', 1:'s', 2:'d', 3:'h'}
 STRAIGHT_STRING_ACE_LOW = 'K Q J 10 9 8 7 6 5 4 3 2 A'
 STRAIGHT_STRING_ACE_HIGH = 'A K Q J 10 9 8 7 6 5 4 3 2'
 
@@ -31,7 +31,7 @@ class Player:
         """
         cards = [self.card1, self.card2] + board
         cards = sorted(cards, key=lambda card: (VALUE_DICT_ACE_HIGH[card.value]), reverse=True)
-        self.tiebreaker = cards[:5]
+        self.tiebreaker = [card.value for card in cards[:5]]
 
 
     def hasHandPair(self, board):
@@ -78,7 +78,7 @@ class Player:
         uniqueValues.remove(pairs[1])
         highCards = sorted(uniqueValues, key=lambda f: (VALUE_DICT_ACE_HIGH[f]), reverse=True)
         kicker = highCards[0]
-        self.hand = 'pair'
+        self.hand = 'two_pair'
         self.tiebreaker = pairs + [kicker]
         return True
 
@@ -228,7 +228,7 @@ class Player:
         for i in range(len(ordered) - 4):
             substring = ' '.join(card.value for card in ordered[i:i+5])
             if substring in straightString:
-                self.hand = 'straight'
+                self.hand = 'straight_flush'
                 self.tiebreaker = [ordered[i].value]
                 return True
 
