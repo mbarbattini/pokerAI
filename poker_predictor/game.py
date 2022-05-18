@@ -1,16 +1,12 @@
-from dataclasses import dataclass
-from threading import local
-from unittest.mock import NonCallableMagicMock
 import numpy as np
 import random
-# from player import Player
-from playerImproved import Player
+from player import Player
 import time
+from collections import namedtuple
 
-@dataclass
-class Card:
-    value: str
-    suit: str
+
+Card = namedtuple('Card', 'value suit')
+
 
 hand_rankings = {
     "high_card": 9,
@@ -125,27 +121,27 @@ class Game():
 
         # second round of evaluation
         self.dealFlop()
-        self.evaluatePlayers()
-        self.printInfo(2)
-        if delay:
-            time.sleep(3)
+        # self.evaluatePlayers()
+        # self.printInfo(2)
+        # if delay:
+        #     time.sleep(3)
 
         # third round of evaluation
         self.dealSingleCard()
-        self.evaluatePlayers()
-        self.printInfo(3)
-        if delay:
-            time.sleep(3)
+        # self.evaluatePlayers()
+        # self.printInfo(3)
+        # if delay:
+        #     time.sleep(3)
 
         # final round of evaluation
         self.dealSingleCard()
-        self.performance()
+        # self.performance()
         self.evaluatePlayers()
-        self.printInfo(4)
-        winner = self.determineWinner()
-        print(f'Winner: {winner.hand} ({winner.bestCards})')
-        if delay:
-            time.sleep(3)
+        # self.printInfo(4)
+        # winner = self.determineWinner()
+        # print(f'Winner: {winner.hand} ({winner.bestCards})')
+        # if delay:
+            # time.sleep(3)
         # self.printFinalResults()
         # if gameNumber % 10000 == 0:
             # print(f"Game {gameNumber//1000}k")
@@ -232,49 +228,40 @@ class Game():
     def evaluatePlayers(self):
         """ 
         Evaluate each player for their highest hand 
-        Player method updates hand member variable, returns bool
+        Player method updates hand, tiebreaker member variable, returns bool
         Saves computation by not calculating any hands that are lowest than the highest
         """
         for player in self.players:
-            # if player.hasHandRoyalFlush(self.board):
-            #     self.countRoyalFlush += 1
-            #     player.bestHandRoyalFlush(self.board)
-            #     continue
-            # elif player.hasHandStraightFlush(self.board): 
-            #     self.countStraightFlush += 1
-            #     player.bestHandStraightFlush(self.board)
-            #     continue
-            # elif player.hasHandFourOfAKind(self.board): 
-            #     self.countFourOfAKind += 1
-            #     player.bestHandFourOfAKind(self.board)
-            #     continue
-            # elif player.hasHandFullHouse(self.board): 
-            #     self.countFullHouse += 1
-            #     player.bestHandFullHouse(self.board)
-            #     continue
-            # elif player.hasHandFlush(self.board): 
-            #     self.countFlush += 1
-            #     player.bestHandFlush(self.board)
-            #     continue
-            # elif player.hasHandStraight(self.board): 
-            #     self.countStraight += 1
-            #     player.bestHandStraight(self.board)
-            #     continue
-            # elif player.hasHandThreeOfAKind(self.board): 
-            #     self.countThreeOfAKind += 1
-            #     player.bestHandThreeOfAKind(self.board)
-            #     continue
-            # elif player.hasHandTwoPair(self.board): 
-            #     self.countTwoPair += 1
-            #     player.bestHandTwoPair(self.board)
-            #     continue
-            player.hasHandPair(self.board)
-            self.countPair += 1
-            # player.bestHandPair(self.board)
-                # continue
-            # else:
-            #     self.countHighCard += 1
-            #     player.bestHandHighCard(self.board)
+            if player.hasHandRoyalFlush(self.board):
+                self.countRoyalFlush += 1
+                continue
+            elif player.hasHandStraightFlush(self.board):
+                self.countStraightFlush += 1
+                continue
+            elif player.hasHandFourOfAKind(self.board):
+                self.countFourOfAKind += 1
+                continue
+            elif player.hasHandFullHouse(self.board):
+                self.countFullHouse += 1
+                continue
+            elif player.hasHandFlush(self.board):
+                self.countFlush += 1
+                continue
+            elif player.hasHandStraight(self.board): 
+                self.countStraight += 1
+                continue
+            elif player.hasHandThreeOfAKind(self.board):
+                self.countThreeOfAKind += 1
+                continue
+            elif player.hasHandTwoPair(self.board):
+                self.countTwoPair += 1
+                continue
+            elif player.hasHandPair(self.board):
+                self.countPair += 1
+                continue
+            else:
+                self.countHighCard += 1
+                player.setHighCardTiebreaker(self.board)
 
     
 
