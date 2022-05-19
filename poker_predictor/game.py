@@ -1,3 +1,4 @@
+from functools import total_ordering
 import numpy as np
 import random
 from player import Player
@@ -21,6 +22,9 @@ hand_rankings = {
     "royal_flush": 0
 }
 
+VALUE_DICT_ACE_HIGH = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12}
+
+
 # always want to rank ace as the highest, only consider it being lowest in ex. determine straight method
 value_rankings = {
     '2': 1,
@@ -40,7 +44,7 @@ value_rankings = {
 
 class Game():
     def __init__(self, nPlayers: int) -> None:
-        self.players = [Player() for i in range(nPlayers)]
+        self.players = [Player(i+1) for i in range(nPlayers)]
         self.deck = [ 
            Card('A','h'),
            Card('2','h'),
@@ -114,32 +118,25 @@ class Game():
         self.dealFirst()
 
         # first round of evaluation
-        # self.evaluatePlayers()
-        # self.printInfo(1)
-        # if delay:
-            # time.sleep(3)
+        self.dealFlop()
+        self.evaluatePlayers()
+        self.printInfo(2)
+        if delay:
+            time.sleep(3)
 
         # second round of evaluation
-        self.dealFlop()
-        # self.evaluatePlayers()
-        # self.printInfo(2)
-        # if delay:
-        #     time.sleep(3)
+        self.dealSingleCard()
+        self.evaluatePlayers()
+        self.printInfo(3)
+        if delay:
+            time.sleep(3)
 
         # third round of evaluation
         self.dealSingleCard()
-        # self.evaluatePlayers()
-        # self.printInfo(3)
-        # if delay:
-        #     time.sleep(3)
-
-        # final round of evaluation
-        self.dealSingleCard()
-        # self.performance()
         self.evaluatePlayers()
-        # self.printInfo(4)
-        # winner = self.determineWinner()
-        # print(f'Winner: {winner.hand} ({winner.bestCards})')
+        self.printInfo(4)
+        self.determineWinner()
+        
         # if delay:
             # time.sleep(3)
         # self.printFinalResults()
@@ -182,8 +179,9 @@ class Game():
     def dealSingleCard(self):
         self.board.append(self.chooseCard())
 
-    def dealFlop(self):
-        #TODO(Add a burner card function)
+    def dealFlop(self, burner=False):
+        if burner:
+            self.deck.pop()
         for i in range(3):
             self.board.append(self.chooseCard())
 
@@ -263,117 +261,38 @@ class Game():
                 self.countHighCard += 1
                 player.setHighCardTiebreaker(self.board)
 
-    
-
-    # TODO(Test the fuck out of this)
-    def compareHighCardTwoPlayers(self, allPlayers):
-        """ Compares high card array to another player. Returns winner player object """
-        # for i in range(7):
-        #     selfCard = value_rankings[self.high_card[i]]
-        #     otherCard = value_rankings[other.high_card[i]]
-        #     # keep going until the cards are different
-        #     if selfCard == otherCard:
-        #         continue
-        #     if selfCard < otherCard:
-        #         return other
-        #     else:
-        #         return self
-
-    def compareHighCard(self, allPlayers):
+    def comparePlayers(self, allPlayers):
         """
-        Compares players with a high card. Returns winner player object
+        Compares the tiebreaker array for all players considered
+        Returns the player with the highest hand
+        All players tiebreaker array will always have the same size
         """
-        pass
+        totalPlayers = len(allPlayers)
+        nCards = len(allPlayers[0].tiebreaker)
+        winner = allPlayers[0]
+        tieArray = []
+        tie = False
+        for i in range(1, totalPlayers):
+            for c in range(nCards):
+                # if the cards are the same, move on to the next card in the tiebreaker array
+                if VALUE_DICT_ACE_HIGH[winner.tiebreaker[c]] == VALUE_DICT_ACE_HIGH[allPlayers[i].tiebreaker[c]]:
+                    # if the current card is the last and there is still no winner, tie
+                    if c == nCards - 1:
+                        tie = True
+                        if winner not in tieArray:
+                            tieArray.append(winner)    
+                        tieArray.append(allPlayers[i]) 
+                    continue
+                # if the winner's card is worse, define the new winner
+                if VALUE_DICT_ACE_HIGH[winner.tiebreaker[c]] < VALUE_DICT_ACE_HIGH[allPlayers[i].tiebreaker[c]]:
+                    winner = allPlayers[i]
+                    break
+                # if the winner's card is better, continue
+                break
+        if tie:
+            return tieArray
+        return [winner]
 
-    def comparePair(self, allPlayers):
-        """
-        Compares players with a pair. Returns winner player object
-
-        """
-        # first compare the value of the hand
-
-        # if the value is the same, move on to high card check
-        
-
-    def compareTwoPair(self, allPlayers):
-        """
-        Compares players with a pair. Returns winner player object
-
-        RULES:
-        1) Highest pair
-        2) 1 kicker card
-        """
-        # first compare the value of the hand
-
-        # if the value is the same, move on to high card check
-
-
-    def compareThreeOfAKind(self, allPlayers):
-        """
-        Compares players with a three of a kind. Returns winner player object
-
-        RULES:
-        1) Highest three of a kind wins, doesn't matter the suit
-        2) First kicker card
-        3) Second kicker card
-        """
-        # first compare the value of the hand
-
-        # if the value is the same, move on to high card check
-
-    def compareFullHouse(self, allPlayers):
-        """
-        Compares players with a full house. Returns winner player object 
-        
-        RULES:
-        1) Higher three of a kind
-        2) Higher pair
-        3) Exact same hand, split the pot 
-        
-        """
-        pass
-
-    def compareFlush(self, allPlayers):
-        """
-        Compares players with a flush. Returns winner player object
-
-        RULES:
-        1) Highest flush wins, doesn't matter the suit
-        2) If same high card, move on to the next, etc.
-        3) If all 5 cards are exactly the same value, split the pot
-        """
-        pass
-
-    def compareStraight(self, allPlayers):
-        """
-        Compares players with a straight. Returns winner player object
-
-        RULES:
-        Highest straight wins, doesn't matter the suit
-
-        """
-        pass
-
-    def compareFourOfAKind(self, allPlayers):
-        """
-        Compares players with a four a kind. Returns winner player object
-
-        """
-        # first compare the value of the hand
-
-        # if the value is the same, move on to high card check
-
-    #NOTE Probably never will get a scenario where two players both have straight flushes
-    def compareStraightFlush(self, other):
-        """
-        Compares players with a four a kind. Returns winner player object
-
-        """
-        # first compare the value of the hand
-
-        # if the value is the same, move on to high card check
-
-    #NOTE impossible to get two different royal flushes in Texas Hold Em'
 
     def determineWinner(self):
         """
@@ -398,41 +317,24 @@ class Game():
             totalPlayers = len(currentPlayers)
             if not totalPlayers == 1:
                 # else compare all players who have the same hand
-                return self.compareHands(i, currentPlayers)
+                winner = self.comparePlayers(currentPlayers)
+                if len(winner) == 1:
+                   print(f"\nWinner:     Player {winner[0].number}", end=' ')
+                   winner[0].printHand()
+                   return
+                else:
+                    print(f"\nTie Between Players:    {winner[0].hand}")
+                    for i in range(len(winner)):
+                        print(f"    Player {winner[i].number}:",end=' ') 
+                        winner[i].printHand()
+                    return 
             # if there is only one player, they automatically win
-            return currentPlayers[0]
-
-
-    def compareHands(self, rankIndex, currentPlayers):
-        """
-        Compares players hands for each specified hand type. Returns winner player object
-        """
-        if rankIndex == 9:
-            return self.compareHighCard(currentPlayers)
-        elif rankIndex == 8:
-            return self.comparePair(currentPlayers)
-        elif rankIndex == 7:
-            return self.compareTwoPair(currentPlayers)
-        elif rankIndex == 6:
-            return self.compareThreeOfAKind(currentPlayers)
-        elif rankIndex == 5:
-            return self.compareFlush(currentPlayers)
-        elif rankIndex == 4:
-            return self.compareStraight(currentPlayers)
-        elif rankIndex == 3:
-            return self.compareFullHouse(currentPlayers)
-        elif rankIndex == 2:
-            return self.compareFourOfAKind(currentPlayers)
-        elif rankIndex == 1:
-            return self.compareStraightFlush(currentPlayers)
-        elif rankIndex == 0:
-            # not possible for two players to have a better royal flush over another
-            # only way to get here is if the royal flush is on the table
-            pass
+            print(f"\nWinner:     Player {currentPlayers[0].number}")
+            currentPlayers[0].printHand()
+            return
     
-
-    def printFinalResults(self):
-        pass
+    
+    
 
     
 
