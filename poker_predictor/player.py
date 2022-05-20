@@ -26,6 +26,7 @@ class Player:
         self.number = _number
 
     def printHand(self):
+        print("           ", end=' ')
         for card in self.bestHand:
             print(f"{card.value}{card.suit}",end=' ')
 

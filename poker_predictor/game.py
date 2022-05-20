@@ -1,4 +1,3 @@
-from functools import total_ordering
 import numpy as np
 import random
 from player import Player
@@ -8,39 +7,6 @@ from collections import namedtuple
 
 Card = namedtuple('Card', 'value suit')
 
-
-hand_rankings = {
-    "high_card": 9,
-    "pair": 8,
-    "two_pair": 7,
-    "three_of_a_kind": 6,
-    "straight": 5,
-    "flush": 4,
-    "full_house": 3,
-    "four_of_a_kind": 2,
-    "straight_flush": 1,
-    "royal_flush": 0
-}
-
-VALUE_DICT_ACE_HIGH = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12}
-
-
-# always want to rank ace as the highest, only consider it being lowest in ex. determine straight method
-value_rankings = {
-    '2': 1,
-    '3': 2,
-    '4': 3,
-    '5': 4,
-    '6': 5,
-    '7': 6,
-    '8': 7,
-    '9': 8,
-    '10': 9,
-    'J': 10,
-    'Q': 11,
-    'K': 12,
-    'A': 13
-}
 
 class Game():
     def __init__(self, nPlayers: int) -> None:
@@ -156,8 +122,8 @@ class Game():
         # for i in range(len(self.board)):
         #     print(f"| {self.board[i].value}{self.board[i].suit}", end='  ')
         print("-----------------------\n")
-        for i,ele in enumerate(self.players):
-            print(f"Player {i+1}:   {ele.hand:<15}   {ele.card1.value}{ele.card1.suit} {ele.card2.value}{ele.card2.suit}")
+        for player in self.players:
+            print(f"Player {player.number}:   {player.hand:<15}   {player.card1.value}{player.card1.suit} {player.card2.value}{player.card2.suit}")
 
     def shuffle(self):
         """ Shuffles the deck randomly """
@@ -267,6 +233,7 @@ class Game():
         Returns the player with the highest hand
         All players tiebreaker array will always have the same size
         """
+        VALUE_DICT_ACE_HIGH = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, 'J': 9, 'Q': 10, 'K': 11, 'A': 12}
         totalPlayers = len(allPlayers)
         nCards = len(allPlayers[0].tiebreaker)
         winner = allPlayers[0]
@@ -287,7 +254,7 @@ class Game():
                 if VALUE_DICT_ACE_HIGH[winner.tiebreaker[c]] < VALUE_DICT_ACE_HIGH[allPlayers[i].tiebreaker[c]]:
                     winner = allPlayers[i]
                     break
-                # if the winner's card is better, continue
+                # if the winner's card is better, don't look at any other cards
                 break
         if tie:
             return tieArray
@@ -298,6 +265,18 @@ class Game():
         """
         Compares each player's hands against each other. Returns array of player objects with highest player in first index
         """
+        hand_rankings = {
+            "high_card": 9,
+            "pair": 8,
+            "two_pair": 7,
+            "three_of_a_kind": 6,
+            "straight": 5,
+            "flush": 4,
+            "full_house": 3,
+            "four_of_a_kind": 2,
+            "straight_flush": 1,
+            "royal_flush": 0
+        }
         # create a 2D array of ranked player objects. Highest first index is winner
         # Second index is if there any any players with the same hand
         rankedHands = [ [],[],[],[],[],[],[],[],[],[] ]
@@ -319,36 +298,19 @@ class Game():
                 # else compare all players who have the same hand
                 winner = self.comparePlayers(currentPlayers)
                 if len(winner) == 1:
-                   print(f"\nWinner:     Player {winner[0].number}", end=' ')
+                   print(f"\nWinner:     Player {winner[0].number}   {winner[0].hand}")
                    winner[0].printHand()
                    return
                 else:
                     print(f"\nTie Between Players:    {winner[0].hand}")
                     for i in range(len(winner)):
-                        print(f"    Player {winner[i].number}:",end=' ') 
+                        print(f"    Player {winner[i].number}:") 
                         winner[i].printHand()
                     return 
             # if there is only one player, they automatically win
-            print(f"\nWinner:     Player {currentPlayers[0].number}")
+            print(f"\nWinner:     Player {currentPlayers[0].number}   {currentPlayers[0].hand}")
             currentPlayers[0].printHand()
             return
     
     
     
-
-    
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
