@@ -131,9 +131,10 @@ class Game():
 
 
 
-    # TODO(Catch error if too many players and run out of cards)
     def chooseCard(self) -> str:
         """ Removes the last card in the cards array and updates it """
+        if len(self.deck) == 1:
+            raise RuntimeError("There are no cards left!")
         return self.deck.pop()
 
     def dealFirst(self) -> None:

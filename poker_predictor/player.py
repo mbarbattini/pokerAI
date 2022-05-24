@@ -120,6 +120,7 @@ class Player:
         Tiebreaker:
             [highest card of straight]
         """
+        #TODO ties not working when straight is on the board but other players have a higher straight with one extra card
         cards = [self.card1, self.card2] + board
         # consider straights that begin with ace 
         ranking, straightString = VALUE_DICT_ACE_LOW, STRAIGHT_STRING_ACE_LOW
