@@ -1,3 +1,4 @@
+from doctest import FAIL_FAST
 import numpy as np
 import random
 from player import Player
@@ -252,6 +253,7 @@ class Game():
                         tieArray.append(allPlayers[i]) 
                     continue
                 # if the winner's card is worse, define the new winner
+                tie = False
                 if VALUE_DICT_ACE_HIGH[winner.tiebreaker[c]] < VALUE_DICT_ACE_HIGH[allPlayers[i].tiebreaker[c]]:
                     winner = allPlayers[i]
                     break

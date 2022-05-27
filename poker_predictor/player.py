@@ -192,7 +192,7 @@ class Player:
             if allValues.count(ele1) == 3:
                 for ele2 in uniqueValues:
                     if allValues.count(ele2) == 2:
-                        tiebreaker = sorted([ele1, ele2], key=lambda f: VALUE_DICT_ACE_HIGH[f], reverse=True)
+                        tiebreaker = [ele1, ele2]
                         self.hand = 'full_house'
                         self.tiebreaker = tiebreaker
                         self.bestHand = [card for card in cards if card.value in [ele1, ele2]]
@@ -200,7 +200,7 @@ class Player:
             if allValues.count(ele1) == 2:
                 for ele2 in uniqueValues:
                     if allValues.count(ele2) == 3:
-                        tiebreaker = sorted([ele1, ele2], key=lambda f: VALUE_DICT_ACE_HIGH[f], reverse=True)
+                        tiebreaker = [ele2, ele1]
                         self.hand = 'full_house'
                         self.tiebreaker = tiebreaker
                         self.bestHand = [card for card in cards if card.value in [ele1, ele2]]

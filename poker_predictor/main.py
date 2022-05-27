@@ -32,8 +32,8 @@ def playSingleGames():
 
 
 def main():
-    playSingleGames()
-    # handFrequencySimulations()
+    # playSingleGames()
+    handFrequencySimulations()
 
 
 
