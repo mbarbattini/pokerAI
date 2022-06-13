@@ -24,6 +24,9 @@ class Player:
         self.tiebreaker = None
         self.bestHand = []
         self.number = _number
+        self.bet = None
+        self.networth = 10.0
+        self.user = False
 
     def printHand(self):
         print("           ", end=' ')
