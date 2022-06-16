@@ -34,12 +34,12 @@ class Game():
         self.userFold = False
         self.bettingManager = Betting(self.littleBlindValue)
         self.userOut = False
+        self.userAllIn = False
 
         # generate the user player
         userIndex = random.randint(0, self.nPlayers - 1)
         self.players[userIndex].user = True
 
-    def resetDeck(self):
         self.deck = copy.copy(unshuffledDeck)
 
     def play(self, delay=False):
@@ -54,37 +54,40 @@ class Game():
             # first round of evaluation
             self.dealFlop()
             self.evaluatePlayers()
-            if not self.userFold:
-                self.printInfo(2)
+            self.printInfo(2)
+            if not self.userFold or self.userAllIn:
                 self.betting()
-                if delay:
-                    time.sleep(3)
+            if delay:
+                time.sleep(3)
 
             # second round of evaluation
             self.dealSingleCard()
             self.evaluatePlayers()
-            if not self.userFold:
-                self.printInfo(3)
+            self.printInfo(3)
+            if not self.userFold or self.userAllIn:
                 self.betting()
-                if delay:
-                    time.sleep(3)
+            if delay:
+                time.sleep(3)
 
             # third round of evaluation
             self.dealSingleCard()
             self.evaluatePlayers()
-            if not self.userFold:
-                self.printInfo(4)
+            self.printInfo(4)
+            if not self.userFold or self.userAllIn:
                 self.betting()
-                if delay:
-                    time.sleep(3)
+            if delay:
+                time.sleep(3)
 
             self.determineWinner()
+            # check if the user has any money left
+            self.checkIfUserOut()
             # the user has no more money
             if self.userOut:
+                print("\nThanks for playing!")
                 return
             # ask to play again
             while True:
-                playAgain = input("\nWould you like to play again? (y / n)")
+                playAgain = input("\nWould you like to play again? (y / n)     ")
                 if playAgain == "y":
                     self.dealerIndex += 1
                     self.resetGameAttributes()
@@ -267,6 +270,11 @@ class Game():
             return tieArray
         return [winner]
 
+    def checkIfUserOut(self):
+        for player in self.players:
+            if player.user and player.networth <= 0:
+                self.userOut = True
+
 
     def determineWinner(self):
         """
@@ -325,8 +333,6 @@ class Game():
 
             for player in self.players:
                 print(f"Player {player.number}:   ${player.networth}")
-
-
             return
 
     def resetGameAttributes(self):
@@ -334,8 +340,12 @@ class Game():
             player.hand = "high_card"
             player.bestHand = ""
             player.tiebreaker = []
+        self.userFold = False
         self.board = []
-        self.resetDeck()
+        self.deck = copy.copy(unshuffledDeck)
+        self.bettingManager.pot = 0
+        self.bettingManager.betMade = False
+        self.bettingManager.currentBetAmount = 0
 
     def betting(self):
         orderedPlayers = self.players[self.dealerIndex:] + self.players[:self.dealerIndex]
@@ -365,12 +375,13 @@ class Game():
                         decision = input("c / r / f :     ")
                         if decision == "c":
                             if not betMan.callBet(player):
-                                print("You cannot call. Would you like to go all in?")
-                                allIn = input("(y / n)")
-                                if allIn == "y":
+                                print("You cannot call. You can go all in or leave the game.")
+                                allIn = input("(a / l)     ")
+                                if allIn == "a":
                                     betMan.allIn(player)
+                                    self.userAllIn = True
                                     break
-                                elif allIn == "n": 
+                                elif allIn == "l": 
                                     self.userFold = True
                                     self.userOut = True
                                     break

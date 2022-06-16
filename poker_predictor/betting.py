@@ -12,8 +12,11 @@ class Betting:
             raiseAmount = float(input("Amount: "))
             if raiseAmount > _player.networth:
                 print("Bet too large!")
+            elif raiseAmount < self.currentBetAmount:
+                print("Bet must be larger than the current bet.")
             else:
                 _player.networth -= raiseAmount
+                self.currentBetAmount = raiseAmount
                 self.pot += raiseAmount
                 break
 
