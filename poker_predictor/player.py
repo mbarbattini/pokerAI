@@ -25,8 +25,9 @@ class Player:
         self.bestHand = []
         self.number = _number
         self.bet = None
-        self.networth = 10.0
+        self.networth = 100.0
         self.user = False
+        self.out = False
 
     def printHand(self):
         print("           ", end=' ')

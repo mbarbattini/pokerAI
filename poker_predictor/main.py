@@ -25,15 +25,14 @@ def handFrequencySimulations():
 
 def playSingleGames():
     numberPlayers = 8
-    delay = 3
 
     game = Game(numberPlayers)
-    game.play(delay)
+    game.play()
 
 
 def main():
-    # playSingleGames()
-    handFrequencySimulations()
+    playSingleGames()
+    # handFrequencySimulations()
 
 
 

@@ -1,70 +1,17 @@
-from doctest import FAIL_FAST
 import numpy as np
 import random
 from player import Player
 import time
 from collections import namedtuple
-
-
-Card = namedtuple('Card', 'value suit')
+from betting import Betting
+from deckConst import unshuffledDeck
+import copy
 
 
 class Game():
+    
     def __init__(self, nPlayers: int) -> None:
-        self.deck = [ 
-           Card('A','h'),
-           Card('2','h'),
-           Card('3','h'),
-           Card('4','h'),
-           Card('5','h'),
-           Card('6','h'),
-           Card('7','h'),
-           Card('8','h'),
-           Card('9','h'),
-           Card('10','h'),
-           Card('J','h'),
-           Card('Q','h'),
-           Card('K','h'),
-           Card('A','d'),
-           Card('2','d'),
-           Card('3','d'),
-           Card('4','d'),
-           Card('5','d'),
-           Card('6','d'),
-           Card('7','d'),
-           Card('8','d'),
-           Card('9','d'),
-           Card('10','d'),
-           Card('J','d'),
-           Card('Q','d'),
-           Card('K','d'),
-           Card('A','c'),
-           Card('2','c'),
-           Card('3','c'),
-           Card('4','c'),
-           Card('5','c'),
-           Card('6','c'),
-           Card('7','c'),
-           Card('8','c'),
-           Card('9','c'),
-           Card('10','c'),
-           Card('J','c'),
-           Card('Q','c'),
-           Card('K','c'),
-           Card('A','s'),
-           Card('2','s'),
-           Card('3','s'),
-           Card('4','s'),
-           Card('5','s'),
-           Card('6','s'),
-           Card('7','s'),
-           Card('8','s'),
-           Card('9','s'),
-           Card('10','s'),
-           Card('J','s'),
-           Card('Q','s'),
-           Card('K','s')
-        ]
+        self.deck = copy.copy(unshuffledDeck)
         self.players = [Player(i+1) for i in range(nPlayers)]
         self.board = []
         self.nPlayers = nPlayers
@@ -78,51 +25,74 @@ class Game():
         self.countFourOfAKind = 0
         self.countStraightFlush = 0
         self.countRoyalFlush = 0
-        self.currentBet = 0.0
-        self.pot = 0.0
+        # self.currentBet = 0.0
+        # self.pot = 0.0
         self.littleBlindValue = 1.0
-        # always make the dealer the first player in the array
-        self.dealer = self.players[0]
+        # always start with the dealer being the first player in the array
+        self.dealerIndex = 0
+        self.dealer = self.players[self.dealerIndex % self.nPlayers]
         self.userFold = False
+        self.bettingManager = Betting(self.littleBlindValue)
+        self.userOut = False
 
         # generate the user player
         userIndex = random.randint(0, self.nPlayers - 1)
         self.players[userIndex].user = True
 
+    def resetDeck(self):
+        self.deck = copy.copy(unshuffledDeck)
+
     def play(self, delay=False):
         """ Sequence of events for a complete game """
-        self.shuffle()
-        self.dealFirst()
-        self.collectAnte()
-        self.printInfo(1)
-        self.betting()
-
-        # first round of evaluation
-        self.dealFlop()
-        self.evaluatePlayers()
-        if not self.userFold:
-            self.printInfo(2)
-            self.betting()
-            if delay:
-                time.sleep(3)
-
-        # second round of evaluation
-        self.dealSingleCard()
-        self.evaluatePlayers()
-        if not self.userFold:
-            self.printInfo(3)
-            self.betting()
-            if delay:
-                time.sleep(3)
-
-        # third round of evaluation
-        self.dealSingleCard()
-        self.evaluatePlayers()
-        if not self.userFold:
-            self.printInfo(4)
+        while True:
+            self.shuffle()
+            self.dealFirst()
+            self.bettingManager.collectAnte(self.littleBlindValue, self.players, self.dealerIndex)
+            self.printInfo(1)
             self.betting()
 
-        self.determineWinner()
+            # first round of evaluation
+            self.dealFlop()
+            self.evaluatePlayers()
+            if not self.userFold:
+                self.printInfo(2)
+                self.betting()
+                if delay:
+                    time.sleep(3)
+
+            # second round of evaluation
+            self.dealSingleCard()
+            self.evaluatePlayers()
+            if not self.userFold:
+                self.printInfo(3)
+                self.betting()
+                if delay:
+                    time.sleep(3)
+
+            # third round of evaluation
+            self.dealSingleCard()
+            self.evaluatePlayers()
+            if not self.userFold:
+                self.printInfo(4)
+                self.betting()
+                if delay:
+                    time.sleep(3)
+
+            self.determineWinner()
+            # the user has no more money
+            if self.userOut:
+                return
+            # ask to play again
+            while True:
+                playAgain = input("\nWould you like to play again? (y / n)")
+                if playAgain == "y":
+                    self.dealerIndex += 1
+                    self.resetGameAttributes()
+                    break
+                elif playAgain == "n":
+                    return
+                else:
+                    print("Invalid input.")
         
         # if delay:
             # time.sleep(3)
@@ -138,7 +108,7 @@ class Game():
             user = None
             for player in self.players:
                 if not player.user:
-                    print(f"Player {player.number}:   --   - - ")
+                    print(f"Player {player.number}:   ${player.networth}")
                 else: user = player
             print(f"\nYou (${user.networth})\nPlayer {user.number}:   {user.hand:<15}   {user.card1.value}{user.card1.suit} {user.card2.value}{user.card2.suit}\n")
             return
@@ -155,7 +125,7 @@ class Game():
         for player in self.players:
             if not player.user:
                 # print(f"Player {player.number}:   {player.hand:<15}   {player.card1.value}{player.card1.suit} {player.card2.value}{player.card2.suit}")
-                print(f"Player {player.number}:   --   - - ")
+                print(f"Player {player.number}:   ${player.networth}")
             else: user = player
         
         print(f"\nYou (${user.networth})\nPlayer {user.number}:   {user.hand:<15}   {user.card1.value}{user.card1.suit} {user.card2.value}{user.card2.suit}")
@@ -338,7 +308,7 @@ class Game():
                 if len(winner) == 1:
                    print(f"\nWinner:     Player {winner[0].number}   {winner[0].hand}")
                    winner[0].printHand()
-                   winner[0].networth += self.pot
+                   winner[0].networth += self.bettingManager.pot
                    return
                 # the compare player array has multiple winners
                 else:
@@ -346,65 +316,77 @@ class Game():
                     for i in range(len(winner)):
                         print(f"    Player {winner[i].number}:") 
                         winner[i].printHand()
-                        winner[i].networth += (self.pot / len(winner))
+                        winner[i].networth += (self.bettingManager.pot / len(winner))
                     return 
             # if there is only one player, they automatically win
             print(f"\nWinner:     Player {currentPlayers[0].number}   {currentPlayers[0].hand}")
             currentPlayers[0].printHand()
-            currentPlayers[0].networth += self.pot
+            currentPlayers[0].networth += self.bettingManager.pot
+
+            for player in self.players:
+                print(f"Player {player.number}:   ${player.networth}")
+
+
             return
 
+    def resetGameAttributes(self):
+        for player in self.players:
+            player.hand = "high_card"
+            player.bestHand = ""
+            player.tiebreaker = []
+        self.board = []
+        self.resetDeck()
+
     def betting(self):
-        for player in self.players[1:]:
+        orderedPlayers = self.players[self.dealerIndex:] + self.players[:self.dealerIndex]
+        betMan = self.bettingManager
+        for player in orderedPlayers:
+            if player.out:
+                continue
             if player.user:
-                print(f"The current bet is ${self.bet}. Would you like to check, call, raise, or fold?")
-                betMade = False 
-                while True:
-                    if betMade:
-                        break
-                    decision = input("x / c / r / f :     ")
-                    if decision == "x":
-                        break
-                    elif decision == "c":
-                        player.networth -= self.bet
-                        self.pot += self.bet
-                        break
-                    elif decision == "r":
-                        while True:
-                            raiseAmount = float(input("Amount: "))
-                            if raiseAmount > player.networth:
-                                print("Bet too large!")
-                            else:
-                                player.networth -= float(raiseAmount)
-                                self.bet += float(raiseAmount)
-                                self.pot += self.bet
-                                betMade = True
-                                break
-                    elif decision == "f":
-                        self.userFold = True
-                        break
-                    else:
-                        print("Please enter a valid option.")
+                if betMan.betMade:
+                    print(f"No player has made a bet. Would you like to check, make a bet, or fold?")
+                    while True:
+                        decision = input("x / r / f :     ")
+                        if decision == "x":
+                            break
+                        elif decision == "r":
+                            betAmount = float(input("Amount:    "))
+                            betMan.makeBet(player, betAmount)
+                        elif decision == "f":
+                            self.userFold = True
+                            break
+                        else:
+                            print("Invalid input.")
+                else:
+                    print(f"The current bet is ${betMan.currentBetAmount}. Would you like to call, raise, or fold?")
+                    # go into input decision loop
+                    while True:
+                        decision = input("c / r / f :     ")
+                        if decision == "c":
+                            if not betMan.callBet(player):
+                                print("You cannot call. Would you like to go all in?")
+                                allIn = input("(y / n)")
+                                if allIn == "y":
+                                    betMan.allIn(player)
+                                    break
+                                elif allIn == "n": 
+                                    self.userFold = True
+                                    self.userOut = True
+                                    break
+                            else: break
+                        elif decision == "r":
+                            betMan.makeBet(player)
+                            break
+                        elif decision == "f":
+                            self.userFold = True
+                            break
+                        else:
+                            print("Please enter a valid option.")
                     
             else:
                 # AI betting
                 pass
                 # just call the current bet
-                player.networth -= self.bet
-                self.pot += self.bet
-        
-
-    def collectAnte(self):
-        bigBlind = self.littleBlindValue * 2
-        self.bet = bigBlind
-        try:
-            self.dealer.networth -= self.littleBlindValue
-        except:
-            self.dealer.networth < self.littleBlindValue
-        for player in self.players:
-            try:
-                player.networth -= (bigBlind * 2)
-            except:
-                player.networth < (bigBlind * 2)
-    
-    
+                player.networth -= betMan.currentBetAmount
+                betMan.pot += betMan.currentBetAmount
