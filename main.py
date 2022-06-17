@@ -1,6 +1,4 @@
-# from poker_predictor import Player, Game
-from player import Player
-from game import Game
+from pokerAI import Game
 import time
 import numpy as np
 
