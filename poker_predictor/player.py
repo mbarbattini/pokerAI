@@ -33,6 +33,7 @@ class Player:
         print("           ", end=' ')
         for card in self.bestHand:
             print(f"{card.value}{card.suit}",end=' ')
+        print("\n")
 
 
     def setHighCardTiebreaker(self, board):
@@ -162,7 +163,7 @@ class Player:
         """
         Determines if the player has a flush
         Tiebreaker:
-            [value of highest card in the flush]
+            [value of highest card in the flush, 2nd, 3rd, 4th, 5th]
         """
         cards = [self.card1, self.card2] + board
         allSuits = [suit for value,suit in cards]

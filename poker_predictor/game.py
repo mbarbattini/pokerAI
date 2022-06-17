@@ -6,6 +6,7 @@ from collections import namedtuple
 from betting import Betting
 from deckConst import unshuffledDeck
 import copy
+from userInput import UserInput
 
 
 class Game():
@@ -301,6 +302,8 @@ class Game():
             # append to the array of the hand type for any additional players
             rankedHands[index].append(player)
 
+        
+
         # iterate from best hand to worst. i: 0 -> 9
         # 0 is the best hand because it was defined this way in hand_rankings dict
         for i in range(10):
@@ -309,24 +312,42 @@ class Game():
             if not currentPlayers:
                 continue
             totalPlayers = len(currentPlayers)
+            # if the user folded, remove them from the comparison array
+            if self.userFold:
+                for player in currentPlayers:
+                    if player.user:
+                        # if the user has the best hand and all other players have lower hands but folded, just move on to the lower hand ranking
+                        if totalPlayers == 1:
+                            continue
+                        # the user and at least one other player have the same type of hand, so it's ok to remove the user because it will keep the array size nonzero
+                        else: currentPlayers.remove(player)
             if not totalPlayers == 1:
                 # else compare all players who have the same hand
                 winner = self.comparePlayers(currentPlayers)
                 # the compare player array has a distinct winner
                 if len(winner) == 1:
-                   print(f"\nWinner:     Player {winner[0].number}   {winner[0].hand}")
-                   winner[0].printHand()
-                   winner[0].networth += self.bettingManager.pot
-                   return
+                    if winner[0].user:
+                        print("\n~~~~~~~~~~~~~~ You won!!!! ~~~~~~~~~~~~~~")
+                    print(f"\nWinner:     Player {winner[0].number}   {winner[0].hand}")
+                    winner[0].printHand()
+                    winner[0].networth += self.bettingManager.pot
+                    return
                 # the compare player array has multiple winners
                 else:
                     print(f"\nTie Between Players:    {winner[0].hand}")
                     for i in range(len(winner)):
+                        if winner[i].user:
+                            print("\n~~~~~~~~~~~~~~ You won!!!! ~~~~~~~~~~~~~~")
                         print(f"    Player {winner[i].number}:") 
                         winner[i].printHand()
                         winner[i].networth += (self.bettingManager.pot / len(winner))
+                    
+                    for player in self.players:
+                        print(f"Player {player.number}:   ${player.networth}")
                     return 
             # if there is only one player, they automatically win
+            if currentPlayers[0].user:
+                print("\n~~~~~~~~~~~~~~ You won!!!! ~~~~~~~~~~~~~~")
             print(f"\nWinner:     Player {currentPlayers[0].number}   {currentPlayers[0].hand}")
             currentPlayers[0].printHand()
             currentPlayers[0].networth += self.bettingManager.pot
@@ -347,6 +368,7 @@ class Game():
         self.bettingManager.betMade = False
         self.bettingManager.currentBetAmount = 0
 
+
     def betting(self):
         orderedPlayers = self.players[self.dealerIndex:] + self.players[:self.dealerIndex]
         betMan = self.bettingManager
@@ -355,45 +377,41 @@ class Game():
                 continue
             if player.user:
                 if betMan.betMade:
-                    print(f"No player has made a bet. Would you like to check, make a bet, or fold?")
-                    while True:
-                        decision = input("x / r / f :     ")
-                        if decision == "x":
-                            break
-                        elif decision == "r":
-                            betAmount = float(input("Amount:    "))
-                            betMan.makeBet(player, betAmount)
-                        elif decision == "f":
-                            self.userFold = True
-                            break
-                        else:
-                            print("Invalid input.")
-                else:
                     print(f"The current bet is ${betMan.currentBetAmount}. Would you like to call, raise, or fold?")
                     # go into input decision loop
-                    while True:
-                        decision = input("c / r / f :     ")
-                        if decision == "c":
-                            if not betMan.callBet(player):
-                                print("You cannot call. You can go all in or leave the game.")
-                                allIn = input("(a / l)     ")
-                                if allIn == "a":
-                                    betMan.allIn(player)
-                                    self.userAllIn = True
-                                    break
-                                elif allIn == "l": 
-                                    self.userFold = True
-                                    self.userOut = True
-                                    break
+                    decision = UserInput.askUserCharInput("(c / r / f):     ", "c r f")
+                    if decision == "c":
+                        if not betMan.callBet(player):
+                            print("You cannot call. You can go all in or leave the game.")
+                            allIn = UserInput.askUserCharInput("(a / l):     ", "a l")
+                            if allIn == "a":
+                                betMan.allIn(player)
+                                self.userAllIn = True
+                            elif allIn == "l": 
+                                self.userFold = True
+                                self.userOut = True
+                    elif decision == "r":
+                        # ask until raise is higher than current bet
+                        while True:
+                            betAmount = UserInput.askUserFloatInput("Amount:     ")
+                            if not betMan.makeBet(player, betAmount): continue
                             else: break
-                        elif decision == "r":
-                            betMan.makeBet(player)
-                            break
-                        elif decision == "f":
-                            self.userFold = True
-                            break
-                        else:
-                            print("Please enter a valid option.")
+                    elif decision == "f":
+                        self.userFold = True
+                else:
+                    print(f"No player has made a bet. Would you like to check, make a bet, or fold?")
+                    decision = UserInput.askUserCharInput("x / r / f:     ", "x r f")
+                    if decision == "x":
+                        continue
+                    elif decision == "r":
+                        while True:
+                            betAmount = UserInput.askUserFloatInput("Amount:     ")
+                            if not betMan.makeBet(player, betAmount): continue
+                            else: break
+                    elif decision == "f":
+                        self.userFold = True
+                        continue
+                
                     
             else:
                 # AI betting
@@ -401,3 +419,6 @@ class Game():
                 # just call the current bet
                 player.networth -= betMan.currentBetAmount
                 betMan.pot += betMan.currentBetAmount
+
+        # after all players have gone, reset bet made for next round
+        betMan.betMade = False

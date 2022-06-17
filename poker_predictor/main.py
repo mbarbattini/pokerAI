@@ -24,7 +24,7 @@ def handFrequencySimulations():
 
 
 def playSingleGames():
-    numberPlayers = 8
+    numberPlayers = 3
 
     game = Game(numberPlayers)
     game.play()

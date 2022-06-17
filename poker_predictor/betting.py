@@ -1,24 +1,25 @@
-from numpy import amax
-
-
 class Betting:
     def __init__(self, _littleBlindAmount):
         self.currentBetAmount = _littleBlindAmount * 2
         self.betMade = False
         self.pot = 0.0
 
-    def makeBet(self, _player):
-        while True:
-            raiseAmount = float(input("Amount: "))
-            if raiseAmount > _player.networth:
-                print("Bet too large!")
-            elif raiseAmount < self.currentBetAmount:
-                print("Bet must be larger than the current bet.")
-            else:
-                _player.networth -= raiseAmount
-                self.currentBetAmount = raiseAmount
-                self.pot += raiseAmount
-                break
+
+    def makeBet(self, _player, _betAmount):
+        if _betAmount > _player.networth:
+            print("Bet too large!")
+            return False
+        elif _betAmount < self.currentBetAmount:
+            print("Bet must be larger than the current bet.")
+            return False
+        else:
+            _player.networth -= _betAmount
+            self.currentBetAmount = _betAmount
+            self.pot += _betAmount
+            self.betMade = True
+            return True
+            
+
 
     def allIn(self, _player):
         self.pot += _player.networth
@@ -31,7 +32,9 @@ class Betting:
         else:
             _player.networth -= self.currentBetAmount
             self.pot += self.currentBetAmount
+            self.betMade = True
             return True
+
 
     def collectAnte(self, _littleBlindValue, _players, _dealerIndex):
         bigBlind = _littleBlindValue * 2
