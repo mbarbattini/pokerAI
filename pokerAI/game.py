@@ -1,11 +1,12 @@
+from .player import Player
+from .betting import Betting
+from .deckConst import unshuffledDeck
+from .userInput import UserInput
+
 import numpy as np
 import random
-from player import Player
 import time
-from betting import Betting
-from deckConst import unshuffledDeck
 import copy
-from userInput import UserInput
 
 
 class Game():
