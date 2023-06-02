@@ -45,6 +45,9 @@ class Player:
         cards = sorted(cards, key=lambda card: (VALUE_DICT_ACE_HIGH[card.value]), reverse=True)
         self.tiebreaker = [card.value for card in cards[:5]]
 
+    def hasSuitedPocket(self):
+        return self.card1.suit == self.card2.suit
+
 
     def hasHandPair(self, board):
         """

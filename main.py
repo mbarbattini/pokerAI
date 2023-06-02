@@ -6,16 +6,19 @@ def handFrequencySimulations():
 
     numberPlayers = 8
     numberGames = 2000
+    nSimulations = 100
+    handDistribution = np.empty((10))
 
+    # for j in range(nSimulations):
     handFrequency = np.zeros((10),dtype=int)
-    start = time.time()
+    # start = time.time()
     for i in range(numberGames):
         game = Game(numberPlayers)
-        game.play()
+        game.playSimulation()
         handFrequency += game.finalPlayerHands()
 
 
-    print(f"\nComputation time: {(time.time()-start) /60} min\n")
+    # print(f"\nComputation time: {(time.time()-start) /60} min\n")
 
     for ele in reversed(handFrequency):
         print(ele)
@@ -29,8 +32,8 @@ def playSingleGames():
 
 
 def main():
-    playSingleGames()
-    # handFrequencySimulations()
+    # playSingleGames()
+    handFrequencySimulations()
 
 
 

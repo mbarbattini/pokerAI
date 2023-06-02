@@ -8,6 +8,19 @@ import random
 import time
 import copy
 
+HANDS_DICT = {
+    "high_card": 0,
+    "pair": 1,
+    "two_pair": 2,
+    "three_of_a_kind": 3,
+    "straight": 4,
+    "flush": 5,
+    "full_house": 6,
+    "four_of_a_kind": 7,
+    "straight_flush": 8,
+    "royal_flush": 9,
+}
+
 
 class Game():
     
@@ -42,6 +55,17 @@ class Game():
         self.players[userIndex].user = True
 
         self.deck = copy.copy(unshuffledDeck)
+
+    def playSimulation(self):
+        self.shuffle()
+        self.dealFirst()
+        self.dealFlop()
+        self.dealSingleCard()
+        self.dealSingleCard()
+        self.dealSingleCard()
+        self.evaluatePlayers()
+        self.determineWinner()
+
 
     def play(self, delay=False):
         """ Sequence of events for a complete game """
@@ -372,7 +396,15 @@ class Game():
     def betting(self):
         orderedPlayers = self.players[self.dealerIndex:] + self.players[:self.dealerIndex]
         betMan = self.bettingManager
+        playerIndex = self.dealerIndex
+        
+        # get each players net worth
+        playerNetWorths = []
         for player in orderedPlayers:
+            playerNetWorths.append(player.networth)
+        
+        for player in orderedPlayers:
+            playerIndex += 1
             if player.out:
                 continue
             if player.user:
@@ -415,10 +447,55 @@ class Game():
                     
             else:
                 # AI betting
-                pass
-                # just call the current bet
-                player.networth -= betMan.currentBetAmount
-                betMan.pot += betMan.currentBetAmount
+                """
+                IDEAS:
+                - The AI calculates what it thinks the best hand is each round
+                - Winning a round decreases the cutoff value
+                - Having significantly more money than other players decreases the cutoff value
+                - Raising amount is chosen based on the weights too
+                - Raise amounts should be a list of integers, like [10, 20, 50, 100, 150, 500, 1000] to mimic real poker
+                - AI can immediately fold after initial draw if it doesn't have good cards
+                - WEIGHTS:
+                  - What hand it currently has
+                  - The difference between the current bet amount and its net worth  
+                  - Cutoff value for when it will raise or call. If the random value (normal distribution centered at 0.5)  
+                    is greater than the cutoff value, it will call, if it's less than it will raise. The value decreases when
+                    it thinks it is doing good, and increases when it thinks it's doing bad. Range 0 - 1
+                  -  
+                
+                """
+                
+                # weight function for hands. Better hand means smaller value. Range 0-1
+                weightsHand = lambda x: np.exp(-0.05*(x)**2)
+                handValue = weightsHand(HANDS_DICT[player.hand])
+
+                # weight function for current bet amount. Larger value if bet is not a significant 
+                # amount of the players net worth. Will always return from 0 to 1 because an AI that had
+                # a current bet greater than its net worth would have either gone all in or folded
+                def weightsBet(currentPlayerNetWorth, currentBet):
+                    return 1 - (currentBet / currentPlayerNetWorth)
+
+                # the current bet is greater than the AI player's net worth
+                if betMan.currentBetAmount > player.networth:
+                    # should the AI go all in
+                    # create a normal distribution centered around the hand function evaulated at three of a kind = 0.3623
+                    # with a standard deviation of 0.2 
+                    # if the random number is less than the current player's handValue, then go all in
+                    # assumes that three of a kind is the hand that is the cutoff for going all in or not
+                    #TODO allow the AI to choose what it thinks the best hand on the table is and center the normal distribution there
+                    #TODO also add bet cutoff
+                    centerLocationHands = weightsHand(3)
+                    if np.random.normal(loc=centerLocationHands, scale=0.2) < handValue:
+                        # go all in
+                        betMan.allIn(player)
+                    else:
+                        # leave
+                        self.players.pop(playerIndex)
+                else:
+                    pass
+                # # just call the current bet
+                # player.networth -= betMan.currentBetAmount
+                # betMan.pot += betMan.currentBetAmount
 
         # after all players have gone, reset bet made for next round
         betMan.betMade = False
